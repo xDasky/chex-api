@@ -37,18 +37,18 @@ allow_headers=["*"],
 
 # Define schema for structured output
 class FactCheck(BaseModel):
-verdict: str = Field(..., description="Estimated truth verdict (e.g. 'True', 'False', 'Uncertain')")
-response: str = Field(..., description="Concise summary of the fact check based on evidence")
-sources: List[str] = Field(..., description="List of source URLs or references used")
+    verdict: str = Field(..., description="Estimated truth verdict (e.g. 'True', 'False', 'Uncertain')")
+    response: str = Field(..., description="Concise summary of the fact check based on evidence")
+    sources: List[str] = Field(..., description="List of source URLs or references used")
 class FactCheckRequest(BaseModel):
-claim: str
+    claim: str
 
 
 # Init Groq
 llm = ChatGroq(
-model="llama-3.3-70b-versatile",
-api_key=groq_api_key,
-temperature=0
+    model="llama-3.3-70b-versatile",
+    api_key=groq_api_key,
+    temperature=0
 )
 
 # Example pipeline
@@ -62,9 +62,11 @@ Exa_answer = ""
 
 @app.get("/")
 def home():
-return {"message": "API is live"}
+    return {"message": "API is live"}
 
 
+
+from fastapi.responses import StreamingResponse
 
 @app.post("/factcheck/stream")
 def factcheck_stream(req: FactCheckRequest):
@@ -84,6 +86,7 @@ def factcheck_stream(req: FactCheckRequest):
         yield f"\n✅ Final Verdict:\n{fact_check}\n"
 
     return StreamingResponse(generate(), media_type="text/plain")
+    
 '''
 # Then, use stream_answer with your original query
 result = exa.stream_answer(
