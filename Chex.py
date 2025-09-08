@@ -67,15 +67,15 @@ def home():
 
 @app.post("/factcheck", response_model=FactCheck)
 def factcheck(req: FactCheckRequest):
-    # Search evidence with Exa
-    print("Received Data Package")
+    print("Endpoint hit!")   # <--- should print immediately
     claim = req.claim
+    print("Before Exa call") # <--- prints before streaming starts
     exa_answer = ""
     result = exa.stream_answer("is it true that " + claim)
     for chunk in result:
         if chunk.content:
             exa_answer += chunk.content
-
+    print("After Exa call")
     # Structured LLM output
     structured_llm = llm.with_structured_output(FactCheck)
     input_text = f"Question: is it true that {claim}\nEvidence:\n{exa_answer}"
