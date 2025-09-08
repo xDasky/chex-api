@@ -21,7 +21,7 @@ llm = ChatGroq(
 # %%
 from exa_py import Exa
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -42,6 +42,7 @@ class FactCheck(BaseModel):
     sources: List[str] = Field(..., description="List of source URLs or references used")
 class FactCheckRequest(BaseModel):
     claim: str
+    images: Optional[List[str]] = []
 
 
 # Init Groq
