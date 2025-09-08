@@ -65,25 +65,6 @@ def home():
 return {"message": "API is live"}
 
 
-@app.post("/factcheck", response_model=FactCheck)
-def factcheck(req: FactCheckRequest):
-    print("Endpoint hit!")   # <--- should print immediately
-    claim = req.claim
-    print("Before Exa call") # <--- prints before streaming starts
-    exa_answer = ""
-    result = exa.stream_answer("is it true that " + claim)
-    for chunk in result:
-        if chunk.content:
-            exa_answer += chunk.content
-    print("After Exa call")
-    # Structured LLM output
-    structured_llm = llm.with_structured_output(FactCheck)
-    input_text = f"Question: is it true that {claim}\nEvidence:\n{exa_answer}"
-    fact_check = structured_llm.invoke(input_text)
-    print("Fact Check Finished")
-    return fact_check
-
-from fastapi.responses import StreamingResponse
 
 @app.post("/factcheck/stream")
 def factcheck_stream(req: FactCheckRequest):
