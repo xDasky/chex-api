@@ -81,7 +81,7 @@ def factcheck_stream(req: FactCheckRequest):
         
         # After Exa finishes, call the LLM
         structured_llm = llm.with_structured_output(FactCheck)
-        input_payload = {"text": f"Question: {claim}\nEvidence:\n{exa_answer}"}
+        input_payload = {"text": f"Question: {req.claim}\nEvidence:\n{exa_answer}"}
         if req.images:  # Add this line
             input_payload["images"] = req.images  # <-- include image URLs
 
