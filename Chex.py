@@ -12,11 +12,11 @@ from langchain_groq import ChatGroq
 # Replace with your actual Groq API key
 groq_api_key = groq_api_key
 
-llm = ChatGroq(
+'''llm = ChatGroq(
 model="llama-3.3-70b-versatile",
 api_key=groq_api_key,
 temperature=0.7
-)
+)'''
 
 # %%
 from exa_py import Exa
@@ -76,22 +76,44 @@ def healthcheck():
 @app.post("/factcheck/stream")
 def factcheck_stream(req: FactCheckRequest):
     def generate():
+        global CheckCount
+
+        claim_text = (req.claim or "").strip()
+        if not claim_text:
+            yield "⚠️ No text to be fact checked\n"
+            return
+
         yield "⏳ Starting fact-check...\n"
         exa_answer = ""
-        global CheckCount
-        print("Fact Checking "+req.claim)
-        CheckCount +=1
-        # Stream chunks as they arrive
-        for chunk in exa.stream_answer("is it true that " + req.claim):
-            if chunk.content:
-                exa_answer += chunk.content
-                yield chunk.content + "\n"
+        print("Fact Checking " + claim_text)
+        CheckCount += 1
 
-        # After Exa finishes, call the LLM
-        structured_llm = llm.with_structured_output(FactCheck)
-        fact_check = structured_llm.invoke(f"Question: {req.claim}\nEvidence:\n{exa_answer}")
-        yield f"\n✅ Final Verdict:\n{fact_check}\n"
+        try:
+            # ✅ Stream chunks from Exa
+            for chunk in exa.stream_answer("is it true that " + claim_text):
+                if chunk.content:
+                    exa_answer += chunk.content
+                    yield chunk.content + "\n"
+
+        except requests.exceptions.ChunkedEncodingError:
+            yield "\n[Stream ended unexpectedly]\n"
+            return  # don’t continue to LLM if stream broke
+        except Exception as e:
+            yield f"\n[Error while streaming: {str(e)}]\n"
+            return
+
+        # ✅ After Exa finishes, call the LLM
+        try:
+            structured_llm = llm.with_structured_output(FactCheck)
+            fact_check = structured_llm.invoke(
+                f"Question: {claim_text}\nEvidence:\n{exa_answer}"
+            )
+            yield f"\n✅ Final Verdict:\n{fact_check}\n"
+        except Exception as e:
+            yield f"\n[Error while generating verdict: {str(e)}]\n"
+
         print("done fact check")
         print(CheckCount)
+
     return StreamingResponse(generate(), media_type="text/plain")
     
