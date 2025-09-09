@@ -68,7 +68,7 @@ from fastapi.responses import StreamingResponse
 
 @app.head("/")
 def healthcheck():
-    return Response(status_code=200)
+    return StreamingResponse(status_code=200)
 
 
 @app.post("/factcheck/stream")
