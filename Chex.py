@@ -87,25 +87,3 @@ def factcheck_stream(req: FactCheckRequest):
 
     return StreamingResponse(generate(), media_type="text/plain")
     
-'''
-# Then, use stream_answer with your original query
-result = exa.stream_answer(
-   "is it true that " + Claim,
-)
-
-
-# Process the streaming response
-for chunk in result:
-   if chunk.content:
-       Exa_answer  += chunk.content
-
-# Create structured output chain
-structured_llm = llm.with_structured_output(FactCheck)
-
-input_text = f"Question: is it true that {Claim}\nEvidence:\n{Exa_answer}"
-fact_check = structured_llm.invoke(input_text)
-
-
-# %%
-print(fact_check)
-'''
