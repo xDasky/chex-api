@@ -51,8 +51,6 @@ llm = ChatGroq(
     temperature=0
 )
 
-# Example pipeline
-Claim = "There is a video of a fish poking it's head out of water, opening it's mouth to eat egg yolk. Is this natural fish behaviour?"
 
 
 exa = Exa(api_key=exa_api_key)
@@ -64,16 +62,22 @@ Exa_answer = ""
 def home():
     return {"message": "API is live"}
 
+CheckCount = 0
 
+from fastapi.responses import Response
 
-from fastapi.responses import StreamingResponse
+@app.head("/")
+def healthcheck():
+    return Response(status_code=200)
+
 
 @app.post("/factcheck/stream")
 def factcheck_stream(req: FactCheckRequest):
     def generate():
         yield "⏳ Starting fact-check...\n"
         exa_answer = ""
-
+        print("Fact Checking "+req.claim)
+        CheckCount +=1
         # Stream chunks as they arrive
         for chunk in exa.stream_answer("is it true that " + req.claim):
             if chunk.content:
@@ -84,6 +88,7 @@ def factcheck_stream(req: FactCheckRequest):
         structured_llm = llm.with_structured_output(FactCheck)
         fact_check = structured_llm.invoke(f"Question: {req.claim}\nEvidence:\n{exa_answer}")
         yield f"\n✅ Final Verdict:\n{fact_check}\n"
-
+        print("done fact check")
+        print(CheckCount)
     return StreamingResponse(generate(), media_type="text/plain")
     
