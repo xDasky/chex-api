@@ -65,10 +65,12 @@ def home():
 CheckCount = 0
 
 from fastapi.responses import StreamingResponse
+from fastapi.responses import Response
 
 @app.head("/")
 def healthcheck():
-    return StreamingResponse(status_code=200)
+    return Response(status_code=200)
+
 
 
 @app.post("/factcheck/stream")
