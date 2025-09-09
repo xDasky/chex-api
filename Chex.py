@@ -76,7 +76,7 @@ def factcheck_stream(req: FactCheckRequest):
     def generate():
         yield "⏳ Starting fact-check...\n"
         exa_answer = ""
-        Global CheckCount
+        global CheckCount
         print("Fact Checking "+req.claim)
         CheckCount +=1
         # Stream chunks as they arrive
