@@ -12,12 +12,6 @@ from langchain_groq import ChatGroq
 # Replace with your actual Groq API key
 groq_api_key = groq_api_key
 
-'''llm = ChatGroq(
-model="llama-3.3-70b-versatile",
-api_key=groq_api_key,
-temperature=0.7
-)'''
-
 # %%
 from exa_py import Exa
 from pydantic import BaseModel, Field
